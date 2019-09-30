@@ -8,6 +8,12 @@ import torch
 from torch.autograd import gradcheck
 from torch.testing import assert_allclose
 
+def test_back_and_forth():
+    x = torch.rand(1, 3, 4, 5)
+    f_rgb = kornia.rgb_to_ycbcr
+    f_ycbcr = kornia.ycbcr_to_rgb
+    assert_allclose(f_ycbcr(f_rgb(x)), x, 1e-3, 1e-3)
+
 
 class TestRgbToYcbcr:
 
@@ -90,6 +96,7 @@ class TestRgbToYcbcr:
         assert gradcheck(kornia.color.RgbToYcbcr(), (data,),
                          raise_exception=True)
 
+    @pytest.mark.skip(reason="turn off all jit for a while")
     def test_jit(self):
         @torch.jit.script
         def op_script(data: torch.Tensor) -> torch.Tensor:
@@ -174,6 +181,7 @@ class TestYcbcrToRgb:
         expected = expected.repeat(2, 1, 1, 1)  # 2x3x2x2
         assert_allclose(f(data), expected, atol=1e-3, rtol=1e-3)
 
+    @pytest.mark.skip(reason="turn off all jit for a while")
     def test_jit(self):
         @torch.jit.script
         def op_script(data: torch.Tensor) -> torch.Tensor:
